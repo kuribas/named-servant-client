@@ -1,0 +1,25 @@
+cabal-version: 1.12
+name: named-servant-client
+version: 0.0.1
+maintainer: kristof@resonata.be
+copyright: Kristof Bastiaensen 2020
+license: BSD3
+license-file: LICENSE
+build-type: Simple
+
+source-repository head
+    type: git
+    location: https://github.com/kuribas/named-servant-client
+
+library
+   Ghc-options: -Wall
+   exposed-modules:
+        Servant.Named.Client
+   hs-source-dirs:
+        src
+   build-depends:
+        base,
+        servant,
+        servant-client-core,
+        named-servant,
+        named
