@@ -1,6 +1,7 @@
 cabal-version: 1.12
 name: named-servant-client
 version: 0.0.1
+synopsis: client support for named-servant
 maintainer: kristof@resonata.be
 copyright: Kristof Bastiaensen 2020
 license: BSD3
@@ -12,13 +13,15 @@ source-repository head
     location: https://github.com/kuribas/named-servant-client
 
 library
+   default-language: Haskell2010
    Ghc-options: -Wall
    exposed-modules:
-        Servant.Named.Client
+        Servant.Client.Named
+        Servant.Client.Record
    hs-source-dirs:
         src
    build-depends:
-        base,
+        base >= 4.7 && < 5,
         servant,
         servant-client-core,
         named-servant,
