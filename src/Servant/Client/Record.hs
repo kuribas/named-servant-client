@@ -25,7 +25,7 @@ import Servant.Record
 
 instance ( RunClient m
          , Generic a
-         , GHasClient m (Rep a ()) api) =>
+         , GHasClient m (Rep a) api) =>
          HasClient m (RecordParam a :> api)
   where
     type Client m (RecordParam a :> api) = a -> Client m api
@@ -39,28 +39,28 @@ instance ( RunClient m
 
 data GParam a
 
-class GHasClient m a api where
+class GHasClient m (a :: * -> *) api where
   gClientWithRoute :: RunClient m
-                   => Proxy m -> Proxy api -> Request -> a -> Client m api
+                   => Proxy m -> Proxy api -> Request -> a () -> Client m api
   gHoistClientMonad :: RunClient m
                     => Proxy m
                     -> Proxy api
                     -> (forall x. mon x -> mon' x)
-                    -> (a -> Client mon api)
-                    -> (a -> Client mon' api)
+                    -> (a () -> Client mon api)
+                    -> (a () -> Client mon' api)
 
 instance ( RunClient m
          , GHasClient m a api
          ) =>
-         HasClient m (GParam a :> api) where
-  type Client m (GParam a :> api) = a -> Client m api
+         HasClient m (GParam (a ()) :> api) where
+  type Client m (GParam (a ()) :> api) = a () -> Client m api
   clientWithRoute pm _ = gClientWithRoute pm (Proxy :: Proxy api)
   {-# INLINE clientWithRoute #-}
   hoistClientMonad pm _ = gHoistClientMonad pm (Proxy :: Proxy api)
   {-# INLINE hoistClientMonad #-}
 
-instance GHasClient m (c m2 ()) api =>
-         GHasClient m (D1 m3 (c m2) ()) api where
+instance GHasClient m c api =>
+         GHasClient m (D1 m3 c) api where
   gClientWithRoute pm _ req (M1 x) =
     gClientWithRoute pm (Proxy :: Proxy api) req x
   {-# INLINE gClientWithRoute #-}
@@ -68,8 +68,8 @@ instance GHasClient m (c m2 ()) api =>
     gHoistClientMonad pm (Proxy :: Proxy api) f (cl . M1) (unM1 x)
   {-# INLINE gHoistClientMonad #-}
 
-instance GHasClient m (a ()) (GParam (b ()) :> api)
-         => GHasClient m ((a :*: b) ()) api where
+instance GHasClient m a (GParam (b ()) :> api)
+         => GHasClient m (a :*: b) api where
   gClientWithRoute pm _ req (x :*: y) =
     gClientWithRoute pm (Proxy :: Proxy (GParam (b ()) :> api)) req x y
   {-# INLINE gClientWithRoute #-}
@@ -78,7 +78,7 @@ instance GHasClient m (a ()) (GParam (b ()) :> api)
     (\x' y'-> cl (x' :*: y')) x y
   {-# INLINE gHoistClientMonad #-}
 
-instance GHasClient m (a ()) api => GHasClient m (C1 mon a ()) api where
+instance GHasClient m a api => GHasClient m (C1 mon a) api where
   gClientWithRoute pm _ req (M1 x) =
     gClientWithRoute pm (Proxy :: Proxy api) req x
   {-# INLINE gClientWithRoute #-}
@@ -90,7 +90,7 @@ instance {-# OVERLAPPING #-}
   ( HasClient m api
   , KnownSymbol sym
   ) =>
-  GHasClient m (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 Bool) ()) api where
+  GHasClient m (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 Bool)) api where
   gClientWithRoute pm _ req (M1 (K1 x)) =
     clientWithRoute pm (Proxy :: Proxy (QueryFlag sym :> api)) req x
   {-# INLINE gClientWithRoute #-}
@@ -104,7 +104,7 @@ instance {-# OVERLAPPING #-}
   , HasClient m api
   , KnownSymbol sym
   ) =>
-  GHasClient m (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 [a]) ()) api where
+  GHasClient m (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 [a])) api where
   gClientWithRoute pm _ req (M1 (K1 x)) =
     clientWithRoute pm (Proxy :: Proxy (QueryParams sym a :> api)) req x
   {-# INLINE gClientWithRoute #-}
@@ -120,7 +120,7 @@ instance {-# OVERLAPPING #-}
   , KnownSymbol sym
   ) =>
   GHasClient m
-             (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 (Maybe a)) ())
+             (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 (Maybe a)))
              api where
   gClientWithRoute pm _ req (M1 (K1 x)) =
     clientWithRoute
@@ -144,7 +144,7 @@ instance {-# OVERLAPPABLE #-}
   , KnownSymbol sym
   ) =>
   GHasClient m
-             (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 a) ())
+             (S1 ('MetaSel ('Just sym) d1 d2 d3) (Rec0 a))
              api where
   gClientWithRoute pm _ req (M1 (K1 x)) =
     clientWithRoute

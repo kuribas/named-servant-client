@@ -22,7 +22,7 @@ library
         src
    build-depends:
         base >= 4.7 && < 5,
-        servant,
-        servant-client-core,
-        named-servant,
+        servant >= 0.17 && < 0.18,
+        servant-client-core >= 0.17 && < 0.18,
+        named-servant == 0.0.2,
         named

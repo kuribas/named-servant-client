@@ -23,6 +23,15 @@ import Named
 unarg :: NamedF f a name -> f a
 unarg (ArgF a) = a
 
+-- | type family to rewrite a named queryparam to a regular
+-- queryparam.  Useful to define instances for classes that extract
+-- information from the API type., for example servant-foreign, or
+-- servant-swagger.
+type family UnNameParam x where
+  UnNameParam (NamedQueryParams sym a) = QueryParams sym a
+  UnNameParam (NamedQueryParam' mods sym a) = QueryParam' mods sym a
+  UnNameParam (NamedQueryFlag sym) = QueryFlag sym
+
 instance (KnownSymbol sym, ToHttpApiData a, HasClient m api)
       => HasClient m (NamedQueryParams sym a :> api) where
 
