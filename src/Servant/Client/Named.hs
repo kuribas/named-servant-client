@@ -17,6 +17,7 @@ import Servant.Named
 import Servant.API.Modifiers
 import Data.Proxy
 import GHC.TypeLits
+import Data.Maybe
 import Data.Functor.Identity
 import Named
 
@@ -36,11 +37,11 @@ instance (KnownSymbol sym, ToHttpApiData a, HasClient m api)
       => HasClient m (NamedQueryParams sym a :> api) where
 
   type Client m (NamedQueryParams sym a :> api) =
-    sym :! [a] -> Client m api
+    sym :? [a] -> Client m api
 
-  clientWithRoute pm Proxy req (Arg paramlist) =
-    clientWithRoute pm (Proxy :: Proxy (QueryParams sym a :> api)) req
-                    paramlist
+  clientWithRoute pm Proxy req (ArgF paramlist) =
+    clientWithRoute pm (Proxy :: Proxy (QueryParams sym a :> api)) req $
+                    fromMaybe [] paramlist
                     
   hoistClientMonad pm _ f cl as =
     hoistClientMonad pm (Proxy :: Proxy api) f (cl as)
