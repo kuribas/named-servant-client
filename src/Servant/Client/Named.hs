@@ -67,11 +67,11 @@ instance (KnownSymbol sym, HasClient m api)
       => HasClient m (NamedQueryFlag sym :> api) where
 
   type Client m (NamedQueryFlag sym :> api) =
-    sym :! Bool -> Client m api
+    sym :? Bool -> Client m api
 
-  clientWithRoute pm Proxy req (Arg paramlist) =
-    clientWithRoute pm (Proxy :: Proxy (QueryFlag sym :> api)) req
-                    paramlist
+  clientWithRoute pm Proxy req (ArgF paramlist) =
+    clientWithRoute pm (Proxy :: Proxy (QueryFlag sym :> api)) req $
+                    fromMaybe False paramlist
                     
   hoistClientMonad pm _ f cl as =
     hoistClientMonad pm (Proxy :: Proxy api) f (cl as)
