@@ -12,7 +12,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 -- | -- | This module just exports orphan instances to make named-servant
--- work with clients
+-- work with clients.  See that package for documentation.
 module Servant.Client.Record () where
 import Servant.API
 import Data.Proxy

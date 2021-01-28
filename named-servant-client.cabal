@@ -1,6 +1,6 @@
 cabal-version: 1.12
 name: named-servant-client
-version: 0.2.0
+version: 0.3.0
 synopsis: client support for named-servant
 maintainer: kristof@resonata.be
 copyright: Kristof Bastiaensen 2020
@@ -24,5 +24,5 @@ library
         base >= 4.7 && < 5,
         servant >= 0.17 && < 0.18,
         servant-client-core >= 0.17 && < 0.18,
-        named-servant == 0.2.0,
+        named-servant == 0.3.0,
         named >= 0.3 && < 0.5

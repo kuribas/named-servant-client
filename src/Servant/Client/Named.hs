@@ -24,15 +24,6 @@ import Named
 unarg :: NamedF f a name -> f a
 unarg (ArgF a) = a
 
--- | type family to rewrite a named queryparam to a regular
--- queryparam.  Useful to define instances for classes that extract
--- information from the API type., for example servant-foreign, or
--- servant-swagger.
-type family UnNameParam x where
-  UnNameParam (NamedQueryParams sym a) = QueryParams sym a
-  UnNameParam (NamedQueryParam' mods sym a) = QueryParam' mods sym a
-  UnNameParam (NamedQueryFlag sym) = QueryFlag sym
-
 instance (KnownSymbol sym, ToHttpApiData a, HasClient m api)
       => HasClient m (NamedQueryParams sym a :> api) where
 
@@ -69,9 +60,9 @@ instance (KnownSymbol sym, HasClient m api)
   type Client m (NamedQueryFlag sym :> api) =
     sym :? Bool -> Client m api
 
-  clientWithRoute pm Proxy req (ArgF paramlist) =
+  clientWithRoute pm Proxy req (ArgF flag) =
     clientWithRoute pm (Proxy :: Proxy (QueryFlag sym :> api)) req $
-                    fromMaybe False paramlist
+                    fromMaybe False flag
                     
   hoistClientMonad pm _ f cl as =
     hoistClientMonad pm (Proxy :: Proxy api) f (cl as)
